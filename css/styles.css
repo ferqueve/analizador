@@ -1,0 +1,33 @@
+.file-drop-zone {
+    border: 2px dashed #ccc;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.file-drop-zone:hover, .file-drop-zone.dragover {
+    border-color: #28a745;
+    background: #e8f5e9;
+}
+
+.selected-files {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.file-item {
+    padding: 8px;
+    margin: 4px 0;
+    background: #f8f9fa;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.progress {
+    height: 5px;
+}
