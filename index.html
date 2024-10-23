@@ -6,8 +6,10 @@
     <title>Sistema de Llamados y CV</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
 </head>
 <body class="bg-light">
     <div class="container py-5">
@@ -45,24 +47,34 @@
             </div>
         </div>
 
-        <!-- Subida de CVs -->
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-success text-white">
-                <h3 class="mb-0"><i class="fas fa-file-upload me-2"></i>Subir Currículums</h3>
-            </div>
-            <div class="card-body">
-                <form id="cvForm">
-                    <div class="mb-3">
-                        <label class="form-label">Currículum (PDF)</label>
-                        <input type="file" class="form-control" id="cvFile" accept=".pdf" multiple required>
-                    </div>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-upload me-2"></i>Analizar CVs
-                    </button>
-                </form>
-            </div>
+       <!-- Subida de CVs -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h3 class="mb-0"><i class="fas fa-file-upload me-2"></i>Subir Currículums</h3>
         </div>
-
+        <div class="card-body">
+            <form id="cvForm">
+                <div class="mb-3">
+                    <div id="dropZone" class="drop-zone">
+                        <input type="file" 
+                               class="file-input-overlay" 
+                               id="cvFile" 
+                               accept=".pdf" 
+                               multiple 
+                               required>
+                        <div id="dropZoneText">
+                            <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                            <p class="mb-0">Arrastra los PDFs aquí o haz clic para seleccionar</p>
+                            <p class="text-muted small mb-0">Archivos seleccionados: <span id="fileCounter">0</span></p>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success" disabled id="analyzeBtn">
+                    <i class="fas fa-upload me-2"></i>Analizar CVs
+                </button>
+            </form>
+        </div>
+    </div>
         <!-- Resultados -->
         <div class="card shadow-sm">
             <div class="card-header bg-info text-white">
@@ -74,7 +86,6 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script src="/js/scripts.js"></script>
 </body>
