@@ -39,6 +39,60 @@ function initNewJobButton() {
     elements.jobForm.querySelector('button[type="submit"]').insertAdjacentElement('beforebegin', newJobBtn);
 }
 
+function resetJobForm() {
+    // Limpiar los campos del formulario
+    document.getElementById('company').value = '';
+    document.getElementById('description').value = '';
+    
+    // Limpiar las aptitudes
+    window.skills.clear();
+    updateSkillsList();
+    
+    // Resetear el trabajo actual
+    window.currentJob = null;
+    
+    // Habilitar todos los campos
+    document.getElementById('company').disabled = false;
+    document.getElementById('description').disabled = false;
+    document.getElementById('skillInput').disabled = false;
+    document.getElementById('addSkill').disabled = false;
+    
+    // Limpiar cualquier mensaje de estado del trabajo
+    const jobStatus = document.getElementById('jobStatus');
+    if (jobStatus) {
+        jobStatus.remove();
+    }
+    
+    // Habilitar el botón de guardar
+    const saveButton = elements.jobForm.querySelector('button[type="submit"]');
+    if (saveButton) {
+        saveButton.disabled = false;
+    }
+}
+
+function updateSkillsList() {
+    if (!elements.skillsList) return;
+    
+    elements.skillsList.innerHTML = '';
+    window.skills.forEach(skill => {
+        const badge = document.createElement('div');
+        badge.className = 'badge bg-primary me-2 mb-2 p-2';
+        badge.innerHTML = `
+            ${skill}
+            <button type="button" class="btn-close btn-close-white ms-2" 
+                    onclick="removeSkill('${skill}')" 
+                    aria-label="Eliminar aptitud"></button>
+        `;
+        elements.skillsList.appendChild(badge);
+    });
+    
+    // Actualizar el contador de aptitudes
+    const skillCount = document.querySelector('.skill-count');
+    if (skillCount) {
+        skillCount.textContent = window.skills.size;
+    }
+}
+
 function initializeStyles() {
     // Agregar estilos para medallas y animaciones
     if (!document.getElementById('customStyles')) {
@@ -71,7 +125,7 @@ function initializeStyles() {
     }
 }
 
-// Exportar funciones que necesitan ser globales
+// Funciones globales
 window.removeSkill = function(skill) {
     window.skills.delete(skill);
     updateSkillsList();
@@ -84,3 +138,23 @@ window.removeFile = function(fileName) {
     updateFileList();
     showFilesPreview();
 };
+
+// Funciones auxiliares UI que podrían ser llamadas desde otros archivos
+function disableJobFields() {
+    document.getElementById('company').disabled = true;
+    document.getElementById('description').disabled = true;
+    document.getElementById('skillInput').disabled = true;
+    document.getElementById('addSkill').disabled = true;
+    elements.jobForm.querySelector('button[type="submit"]').disabled = true;
+}
+
+function showJobStatus() {
+    const statusDiv = document.createElement('div');
+    statusDiv.id = 'jobStatus';
+    statusDiv.className = 'alert alert-success mt-3';
+    statusDiv.innerHTML = `
+        <h5 class="alert-heading">¡Llamado creado con éxito!</h5>
+        <p class="mb-0">Puede proceder a subir y analizar los currículums.</p>
+    `;
+    elements.jobForm.appendChild(statusDiv);
+}
