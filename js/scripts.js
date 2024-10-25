@@ -1,18 +1,86 @@
-!function(){pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";let t=new Set,n=null;document.getElementById("addSkill").addEventListener("click",()=>{let n=document.getElementById("skillInput"),e=n.value.trim().toLowerCase();e&&!t.has(e)&&(t.add(e),l(),n.value="")}),document.getElementById("jobForm").addEventListener("submit",e=>{e.preventDefault(),n={company:document.getElementById("company").value,description:document.getElementById("description").value,skills:Array.from(t)},alert("Llamado guardado exitosamente")}),document.getElementById("cvForm").addEventListener("submit",async e=>{if(e.preventDefault(),!n)return void alert("Por favor, primero cree un llamado");let l=document.getElementById("cvFile").files,r=[];for(let e of l){let{text:l,hasImages:i}=await async function(t){let n=await t.arrayBuffer(),e=await pdfjsLib.getDocument({data:n}).promise,l="";let r=!1;for(let t=1;t<=e.numPages;t++){let n=await e.getPage(t),i=await n.getTextContent();l+=i.items.map(t=>t.str).join(" ");let a=await n.getOperatorList();for(let t=0;t<a.fnArray.length;t++)if(a.fnArray[t]===pdfjsLib.OPS.paintJpegXObject||a.fnArray[t]===pdfjsLib.OPS.paintImageXObject){r=!0;break}}return{text:l,hasImages:r}}(e),a=function(t,n){t=t.toLowerCase();let e=n.filter(n=>t.includes(n.toLowerCase()));return e.length/n.length*100}(l,n.skills);r.push({name:e.name,percentage:a,hasPhoto:i})}!function(t){let n=document.getElementById("results");n.innerHTML="",t.forEach((t,e)=>{let l=document.createElement("div");l.className="col-md-4 mb-4",l.innerHTML=`
-    <div class="card h-100">
-        <div class="card-body text-center">
-            <h5 class="card-title">${t.name}</h5>
-            <div class="position-relative mb-3" style="height: 200px;">
-                <canvas id="chart${e}"></canvas>
-                <div class="position-absolute top-0 end-0">
-                    <span class="badge ${t.hasPhoto?"bg-success":"bg-secondary"}" 
-                          title="${t.hasPhoto?"Contiene imagen":"No contiene imagen"}">
-                        <i class="fas ${t.hasPhoto?"fa-camera":"fa-camera-slash"}"></i>
-                    </span>
-                </div>
-            </div>
-            <p class="card-text">
-                <strong>Coincidencia: ${t.percentage.toFixed(1)}%</strong>
-            </p>
-        </div>
-    </div>`,n.appendChild(l),setTimeout(()=>{let n=document.getElementById(`chart${e}`).getContext("2d");new Chart(n,{type:"doughnut",data:{labels:["Coincidencia","No coincide"],datasets:[{data:[t.percentage,100-t.percentage],backgroundColor:["#28a745","#e9ecef"],borderWidth:0}]},options:{responsive:!0,maintainAspectRatio:!1,cutout:"70%",plugins:{legend:{display:!1},tooltip:{callbacks:{label:function(t){return`${t.label}: ${t.raw.toFixed(1)}%`}}}}}})},0)})}(r.sort((t,n)=>n.percentage-t.percentage).slice(0,5))});let l=()=>{let n=document.getElementById("skillsList");n.innerHTML="",t.forEach(t=>{let e=document.createElement("span");e.className="badge bg-primary d-flex align-items-center",e.innerHTML=`${t}<i class="fas fa-times ms-2 cursor-pointer" onclick="removeSkill('${t}')"></i>`,n.appendChild(e)})};window.removeSkill=n=>{t.delete(n),l()}}();
+// Configuración de PDF.js
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// Variables globales
+window.skills = new Set();
+window.currentJob = null;
+window.selectedFiles = new Set();
+
+// Elementos del DOM principales
+window.elements = {
+    dropZone: document.getElementById('dropZone'),
+    fileInput: document.getElementById('cvFile'),
+    fileCounter: document.getElementById('fileCounter'),
+    analyzeBtn: document.getElementById('analyzeBtn'),
+    resultsDiv: document.getElementById('results'),
+    jobForm: document.getElementById('jobForm'),
+    skillInput: document.getElementById('skillInput'),
+    skillsList: document.getElementById('skillsList')
+};
+
+// Inicialización cuando el DOM está listo
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar el botón de nuevo llamado
+    initNewJobButton();
+    
+    // Inicializar manejadores de eventos
+    initializeEventHandlers();
+    
+    // Inicializar estilos dinámicos
+    initializeStyles();
+});
+
+function initNewJobButton() {
+    const newJobBtn = document.createElement('button');
+    newJobBtn.type = 'button';
+    newJobBtn.className = 'btn btn-outline-secondary me-2';
+    newJobBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Nuevo Llamado';
+    newJobBtn.onclick = resetJobForm;
+    elements.jobForm.querySelector('button[type="submit"]').insertAdjacentElement('beforebegin', newJobBtn);
+}
+
+function initializeStyles() {
+    // Agregar estilos para medallas y animaciones
+    if (!document.getElementById('customStyles')) {
+        const style = document.createElement('style');
+        style.id = 'customStyles';
+        style.textContent = `
+            .bg-copper {
+                background-color: #cd7f32;
+            }
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            #results .col-md-4 {
+                animation: fadeInUp 0.5s ease forwards;
+                opacity: 0;
+            }
+            #results .col-md-4:nth-child(2) { animation-delay: 0.1s; }
+            #results .col-md-4:nth-child(3) { animation-delay: 0.2s; }
+            #results .col-md-4:nth-child(4) { animation-delay: 0.3s; }
+            #results .col-md-4:nth-child(5) { animation-delay: 0.4s; }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+// Exportar funciones que necesitan ser globales
+window.removeSkill = function(skill) {
+    window.skills.delete(skill);
+    updateSkillsList();
+};
+
+window.removeFile = function(fileName) {
+    window.selectedFiles = new Set(
+        Array.from(window.selectedFiles).filter(file => file.name !== fileName)
+    );
+    updateFileList();
+    showFilesPreview();
+};

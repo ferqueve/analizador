@@ -28,8 +28,8 @@ Este proyecto es un sistema web que permite crear llamados laborales y analizar 
 
 1. **Descargar el Proyecto**: Clona el repositorio o descarga los archivos en tu equipo.
    
-   ```bash
-   git clone https://github.com/tuusuario/llamados-cv.git
+git clone https://github.com/ferqueve/llamados-cv.git
+
 Abrir el archivo index.html: Simplemente abre el archivo index.html en un navegador web para acceder a la aplicación.
 
 Crear un Llamado: Completa el formulario para crear un llamado, especificando las aptitudes requeridas.
