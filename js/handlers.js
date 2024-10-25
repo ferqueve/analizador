@@ -18,13 +18,31 @@ function initializeEventHandlers() {
     elements.fileInput.addEventListener('change', handleFileSelect);
 
     // Manejo de skills
-    document.getElementById('addSkill').addEventListener('click', handleAddSkill);
+    const addSkillButton = document.getElementById('addSkill');
+    const skillInput = document.getElementById('skillInput');
+    
+    if (addSkillButton && skillInput) {
+        addSkillButton.addEventListener('click', handleAddSkill);
+        
+        // Agregar aptitud al presionar Enter
+        skillInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleAddSkill();
+            }
+        });
+    }
 
     // Submit del formulario de llamado
-    elements.jobForm.addEventListener('submit', handleJobSubmit);
+    if (elements.jobForm) {
+        elements.jobForm.addEventListener('submit', handleJobSubmit);
+    }
 
-    // Submit del formulario de CV
-    document.getElementById('cvForm').addEventListener('submit', handleCVSubmit);
+    // Botón de analizar CVs
+    const analyzeButton = document.getElementById('analyzeBtn');
+    if (analyzeButton) {
+        analyzeButton.addEventListener('click', handleCVSubmit);
+    }
 }
 
 function preventDefaults(e) {
@@ -54,20 +72,29 @@ function handleFiles(files) {
 }
 
 function handleAddSkill() {
-    const skill = elements.skillInput.value.trim().toLowerCase();
+    const skillInput = document.getElementById('skillInput');
+    const skill = skillInput.value.trim().toLowerCase();
     if (skill && !window.skills.has(skill)) {
         window.skills.add(skill);
         updateSkillsList();
-        elements.skillInput.value = '';
+        skillInput.value = '';
     }
 }
 
 function handleJobSubmit(e) {
     e.preventDefault();
     
+    const company = document.getElementById('company').value.trim();
+    const description = document.getElementById('description').value.trim();
+    
+    if (!company || !description || window.skills.size === 0) {
+        alert('Por favor complete todos los campos y agregue al menos una aptitud.');
+        return;
+    }
+    
     window.currentJob = {
-        company: document.getElementById('company').value,
-        description: document.getElementById('description').value,
+        company: company,
+        description: description,
         skills: Array.from(window.skills),
         createdAt: new Date().toLocaleString()
     };
@@ -78,7 +105,7 @@ function handleJobSubmit(e) {
 }
 
 function handleCVSubmit(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     
     if (!window.currentJob) {
         alert('Por favor, primero cree un llamado');

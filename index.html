@@ -3,90 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Llamados y CV</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="css/styles.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-
+    <title>Aplicación de Matching de Currículums</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        .drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        .drop-zone.dragover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
     <div class="container py-5">
         <!-- Formulario de Llamado -->
         <div class="card mb-4 shadow-sm">
             <div class="card-header bg-primary text-white">
-                <h3 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Crear Llamado</h3>
+                <h3 class="mb-0" id="crear-llamado">Crear Llamado</h3>
             </div>
             <div class="card-body">
                 <form id="jobForm">
                     <div class="mb-3">
-                        <label class="form-label">Empresa</label>
+                        <label for="company" class="form-label">Empresa</label>
                         <input type="text" class="form-control" id="company" required>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Descripción del Llamado</label>
+                        <label for="description" class="form-label">Descripción del Llamado</label>
                         <textarea class="form-control" id="description" rows="3" required></textarea>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Aptitudes Requeridas</label>
+                        <label class="form-label">
+                            Aptitudes Requeridas 
+                            (<span class="skill-count">0</span> aptitudes)
+                        </label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="skillInput">
-                            <button class="btn btn-outline-primary" type="button" id="addSkill">
-                                <i class="fas fa-plus"></i> Agregar
+                            <input type="text" class="form-control" id="skillInput" 
+                                   placeholder="Ingrese una aptitud">
+                            <button type="button" class="btn btn-primary" id="addSkill">
+                                <i class="fas fa-plus me-1"></i> Agregar
                             </button>
                         </div>
+                        <div class="form-text">
+                            Presione Enter o el botón Agregar para añadir cada aptitud
+                        </div>
+                        <div id="skillsList" class="d-flex flex-wrap mt-2">
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <div id="skillsList" class="d-flex flex-wrap gap-2"></div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Guardar Llamado
+                        </button>
                     </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>Guardar Llamado
-                    </button>
                 </form>
             </div>
         </div>
 
-       <!-- Subida de CVs -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-success text-white">
-            <h3 class="mb-0"><i class="fas fa-file-upload me-2"></i>Subir Currículums</h3>
-        </div>
-        <div class="card-body">
-            <form id="cvForm">
+        <!-- Subir CVs -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0" id="subir-curriculums">Subir Currículums</h3>
+            </div>
+            <div class="card-body">
                 <div class="mb-3">
                     <div id="dropZone" class="drop-zone">
-                        <input type="file" 
-                               class="file-input-overlay" 
-                               id="cvFile" 
-                               accept=".pdf" 
-                               multiple 
-                               required>
                         <div id="dropZoneText">
-                            <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
-                            <p class="mb-0">Arrastra los PDFs aquí o haz clic para seleccionar</p>
-                            <p class="text-muted small mb-0">Archivos seleccionados: <span id="fileCounter">0</span></p>
+                            <i class="fas fa-file-upload fa-2x mb-2"></i>
+                            <p class="mb-1">Arrastra los PDFs aquí o haz clic para seleccionar</p>
+                            <p class="mb-0">Archivos seleccionados: <span id="fileCounter">0</span></p>
                         </div>
                     </div>
+                    <input type="file" id="cvFile" multiple accept=".pdf" class="d-none">
                 </div>
-                <button type="submit" class="btn btn-success" disabled id="analyzeBtn">
-                    <i class="fas fa-upload me-2"></i>Analizar CVs
+                <button type="button" class="btn btn-success" id="analyzeBtn" disabled>
+                    <i class="fas fa-search me-1"></i> Analizar CVs
                 </button>
-            </form>
+            </div>
         </div>
-    </div>
+
         <!-- Resultados -->
         <div class="card shadow-sm">
             <div class="card-header bg-info text-white">
-                <h3 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Mejores Coincidencias</h3>
+                <h3 class="mb-0" id="mejores-coincidencias">Mejores Coincidencias</h3>
             </div>
             <div class="card-body">
-                <div class="row" id="results"></div>
+                <div id="results" class="row">
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <!-- Scripts necesarios -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Tus scripts -->
     <script src="/js/scripts.js"></script>
     <script src="/js/handlers.js"></script>
     <script src="/js/analysis.js"></script>
